@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
@@ -30,4 +30,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.11.0'
     androidTestCompile 'org.mockito:mockito-android:2.11.0'
+    compile 'com.squareup.okio:okio:1.13.0'
 }
