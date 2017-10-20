@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.coocaa.liteimageloader.ImageLoader;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,12 +11,10 @@ import java.util.Set;
  * Created by luwei on 17-10-17.
  */
 
-public class MemoryCache implements ICache{
-    private long mTotalSize = 0;
-    private long mCurrentSize = 0;
-    private HashMap<Key,BitmapViews> mCache = new HashMap<>();
-    public MemoryCache(long size){
-        this.mTotalSize = size;
+public class MemoryCache extends Cache<Key,BitmapViews>{
+
+    public MemoryCache(long size) {
+        super(size);
     }
 
     @Override
@@ -40,7 +37,7 @@ public class MemoryCache implements ICache{
     }
 
     @Override
-    public void remove(Key key) {
+    public synchronized void remove(Key key) {
         mCache.remove(key);
     }
 

@@ -4,9 +4,9 @@ package com.coocaa.liteimageloader.cache;
  * Created by luwei on 17-10-17.
  */
 
-public interface ICache {
-    public boolean put(Key key,BitmapViews bitmapViews);
-    public void remove(Key key);
-    public BitmapViews get(Key key);
+public interface ICache <K,V>{
+    public boolean put(K key,V bitmapViews);
+    public void remove(K key);
+    public V get(K key);
     public long recycle();
 }

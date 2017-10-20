@@ -6,4 +6,6 @@ package com.coocaa.liteimageloader;
 
 public class ConfigParams {
     public long mMemorySize = 40 * 1024 * 1024;
+    public long mByteCacheSize = 10 * 1024 * 1024;
+    public String mCachePath = "";
 }

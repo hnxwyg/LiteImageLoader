@@ -9,19 +9,17 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.coocaa.liteimageloader.cache.BitmapViews;
-import com.coocaa.liteimageloader.cache.ICache;
+import com.coocaa.liteimageloader.cache.ByteCache;
 import com.coocaa.liteimageloader.cache.Key;
 import com.coocaa.liteimageloader.cache.MemoryCache;
 import com.coocaa.liteimageloader.core.BitmapParams;
 import com.coocaa.liteimageloader.core.LoadCallback;
-import com.coocaa.liteimageloader.file.LoadImageFromFile;
+import com.coocaa.liteimageloader.core.loader.ByteLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.coocaa.liteimageloader.core.Support.FILE;
-import static com.coocaa.liteimageloader.core.Support.HTTP;
 
 /**
  * Created by luwei on 17-10-17.
@@ -29,11 +27,16 @@ import static com.coocaa.liteimageloader.core.Support.HTTP;
 
 public class ImageLoaderImpl implements IImageLoader{
     private Handler mMainThread = new Handler(Looper.getMainLooper());
-    private ICache mMemoryCache = null;
+    private MemoryCache mMemoryCache = null;
     private HashMap<Key,List<LoadParams>> mTaskMap = new HashMap<>();
+    private ByteLoader mByteLoader = null;
 
     public void setCacheSize(long size){
         mMemoryCache = new MemoryCache(size);
+    }
+
+    public void setByteCacheSize(long size){
+        mByteLoader = new ByteLoader(new ByteCache(size));
     }
 
     @Override
@@ -55,6 +58,7 @@ public class ImageLoaderImpl implements IImageLoader{
                 });
                 return;
             }
+
             synchronized (mTaskMap){
                 if (mTaskMap.containsKey(key)){
                     mTaskMap.get(key).add(params);
@@ -67,7 +71,7 @@ public class ImageLoaderImpl implements IImageLoader{
             }
             LoadCallback callback = new LoadCallback() {
                 @Override
-                public void loadSuccess(String url, final Bitmap bitmap) {
+                public void loadSuccess(BitmapParams url, final Bitmap bitmap) {
                     final Key key = new Key(params.mUrl,params.mWidth,params.mHeight);
                     BitmapViews bitmapViews = new BitmapViews(bitmap);
                     mMemoryCache.put(key,bitmapViews);
@@ -90,7 +94,7 @@ public class ImageLoaderImpl implements IImageLoader{
                     }
                 }
                 @Override
-                public void loadFailed(String url) {
+                public void loadFailed(BitmapParams p) {
 
                 }
             };
@@ -99,13 +103,7 @@ public class ImageLoaderImpl implements IImageLoader{
                     .setWidth(params.mWidth)
                     .setUrl(params.mUrl)
                     .build();
-            switch (scheme){
-                case HTTP:
-                    break;
-                case FILE:
-                    new LoadImageFromFile().loadImage(bitmapParams,callback);
-                    break;
-            }
+            mByteLoader.loadImage(bitmapParams,callback);
         }
     }
 

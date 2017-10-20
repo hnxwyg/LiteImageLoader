@@ -7,6 +7,6 @@ import android.graphics.Bitmap;
  */
 
 public interface LoadCallback {
-    public void loadSuccess(String url,Bitmap bitmap);
-    public void loadFailed(String url);
+    public void loadSuccess(BitmapParams params,Bitmap bitmap);
+    public void loadFailed(BitmapParams params);
 }

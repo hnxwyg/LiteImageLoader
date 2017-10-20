@@ -2,9 +2,12 @@ package com.coocaa.liteimageloader;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.widget.ImageView;
 
 import com.coocaa.liteimageloader.core.ExecutorSupplier;
+
+import java.io.File;
 
 /**
  * Created by luwei on 17-10-16.
@@ -12,6 +15,8 @@ import com.coocaa.liteimageloader.core.ExecutorSupplier;
 
 public class ImageLoader{
     public static final String TAG = "ImageLoader";
+    public static final String CACHE_DIR = "lite_imageloader";
+    public static ConfigParams mConfigParams;
     private ImageLoader(){
 
     }
@@ -32,6 +37,14 @@ public class ImageLoader{
         new ExecutorSupplier(Runtime.getRuntime().availableProcessors());
         if (params != null){
             Holder.holder.setCacheSize(params.mMemorySize);
+            if (TextUtils.isEmpty(params.mCachePath)){
+                params.mCachePath = context.getCacheDir() + File.separator + CACHE_DIR;
+            }
+            File f = new File(params.mCachePath);
+            if (!f.exists())
+                f.mkdirs();
+            mConfigParams = params;
+            Holder.holder.setByteCacheSize(params.mByteCacheSize);
         }
     }
 

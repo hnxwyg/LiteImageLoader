@@ -24,7 +24,7 @@ public class TestActivity extends Activity{
             FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(80,80);
             p.leftMargin = i * 90;
             layout.addView(iv,p);
-            ImageLoader.getLoader().load(new LoadParams.Builder().with(this).load("file:///data/local/bg.jpg").resize(80,80).into(iv).build());
+            ImageLoader.getLoader().load(new LoadParams.Builder().with(this).load("http://img.taopic.com/uploads/allimg/120727/201995-120HG1030762.jpg").resize(80,80).into(iv).build());
         }
     }
 }
