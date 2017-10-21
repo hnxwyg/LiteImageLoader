@@ -9,4 +9,5 @@ import com.coocaa.liteimageloader.core.LoadCallback;
 
 public interface ILoader {
     public void loadImage(BitmapParams params, LoadCallback callback);
+    public void destroy();
 }

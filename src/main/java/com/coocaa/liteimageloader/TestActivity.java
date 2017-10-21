@@ -2,7 +2,6 @@ package com.coocaa.liteimageloader;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -12,7 +11,7 @@ import android.widget.ImageView;
 
 public class TestActivity extends Activity{
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ConfigParams params = new ConfigParams();
         params.mMemorySize = 40 * 1024 * 1024;
@@ -20,7 +19,7 @@ public class TestActivity extends Activity{
         FrameLayout layout = new FrameLayout(this);
         setContentView(layout);
         for (int i = 0; i < 10; i++) {
-            ImageView iv = new ImageView(this);
+            ImageView iv = new MyImageView(this);
             FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(80,80);
             p.leftMargin = i * 90;
             layout.addView(iv,p);

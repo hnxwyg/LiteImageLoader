@@ -8,6 +8,7 @@ public class BitmapParams {
     public String mUrl = "";
     public int mWidth = 0;
     public int mHeight = 0;
+    public String mFileName = "";
 
     public static class Builder{
         private String mUrl = "";

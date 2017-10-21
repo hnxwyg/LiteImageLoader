@@ -1,11 +1,5 @@
 package com.coocaa.liteimageloader.core;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.StringDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Created by luwei on 17-10-17.
  */
@@ -16,9 +10,6 @@ public class Support {
     public static final String FILE = "file";
     public static final String ASSETS = "assets";
     public static final String RESOURCE = "resource";
-    @StringDef({HTTP, HTTPS,FILE,ASSETS,RESOURCE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SupportUri {}
 
 
     public static final byte[] JPEG_NUMBER = {74,70,73,70};
@@ -28,11 +19,7 @@ public class Support {
     public static final int PNG = 1;
     public static final int NOT_SUPPORT_IMAGE = -1;
 
-    @IntDef({NOT_SUPPORT_IMAGE, JPEG,PNG})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SupportImage {}
-
-    public static @SupportImage int getImageType(byte[] bytes){
+    public static int getImageType(byte[] bytes){
         byte b1 = bytes[1];
         byte b2 = bytes[2];
         byte b3 = bytes[3];

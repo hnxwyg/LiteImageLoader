@@ -17,18 +17,21 @@ public class Key {
 
     @Override
     public int hashCode() {
-        StringBuilder b = new StringBuilder();
-        return b.append(mUrl).append("_").append(mWidth)
-                .append("_").append(mHeight)
-                .toString().hashCode();
+//        StringBuilder b = new StringBuilder();
+//        return b.append(mUrl).append("_").append(mWidth)
+//                .append("_").append(mHeight)
+//                .toString().hashCode();
+        return mUrl.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Key){
-            if (mUrl.equals(((Key) obj).mUrl)
-                    && mWidth == ((Key) obj).mWidth
-                    && mHeight == ((Key) obj).mHeight)
+//            if (mUrl.equals(((Key) obj).mUrl)
+//                    && mWidth == ((Key) obj).mWidth
+//                    && mHeight == ((Key) obj).mHeight)
+//                return true;
+            if (mUrl.equals(((Key) obj).mUrl))
                 return true;
         }
         return false;

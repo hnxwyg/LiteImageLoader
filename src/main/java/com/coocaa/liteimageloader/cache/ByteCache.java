@@ -35,6 +35,11 @@ public class ByteCache extends Cache<Key,byte[]>{
     }
 
     @Override
+    public void destroy() {
+        mCache.clear();
+    }
+
+    @Override
     public synchronized byte[] get(Key key) {
         return mCache.get(key);
     }

@@ -1,9 +1,7 @@
 package com.coocaa.liteimageloader;
 
 import android.content.Context;
-import android.net.Uri;
 import android.text.TextUtils;
-import android.widget.ImageView;
 
 import com.coocaa.liteimageloader.core.ExecutorSupplier;
 
@@ -50,12 +48,5 @@ public class ImageLoader{
 
     public static void destroy(){
 
-    }
-
-
-    public static class LoadBuilder{
-        public Context context;
-        public Uri uri;
-        public ImageView iv;
     }
 }

@@ -8,4 +8,5 @@ import com.coocaa.liteimageloader.core.BitmapParams;
 
 public interface ILoadByte {
     public void loadImage(BitmapParams params, LoadByteCallback callback);
+    public void destroy();
 }

@@ -30,4 +30,9 @@ public class FilePathCache extends Cache<String,String>{
         mCache.clear();
         return 0;
     }
+
+    @Override
+    public void destroy() {
+
+    }
 }

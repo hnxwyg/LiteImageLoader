@@ -1,6 +1,7 @@
 package com.coocaa.liteimageloader.cache;
 
 import android.graphics.Bitmap;
+import android.view.View;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
@@ -23,7 +24,8 @@ public class BitmapViews {
         int size = mViews.size();
         for (int i = 0; i < size; i++) {
             WeakReference<ImageView> view = mViews.get(0);
-            if (view.get() != null)
+            View v= view.get();
+            if (v != null || v.getParent() != null || v.getVisibility() != View.GONE)
                 return 0;
         }
         int memory = mBitmap.getByteCount();
@@ -53,9 +55,11 @@ public class BitmapViews {
         int size = mViews.size();
         for (int i = 0; i < size; i++) {
             ImageView view = mViews.get(i).get();
-            if (view.getDrawable() != null)
-                view.getDrawable().setCallback(null);
-            view.setImageDrawable(null);
+            if (view != null){
+                if (view.getDrawable() != null)
+                    view.getDrawable().setCallback(null);
+                view.setImageDrawable(null);
+            }
         }
         mViews.clear();
         int memory = mBitmap.getByteCount();

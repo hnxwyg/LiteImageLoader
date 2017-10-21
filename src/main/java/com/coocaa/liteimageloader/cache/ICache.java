@@ -9,4 +9,5 @@ public interface ICache <K,V>{
     public void remove(K key);
     public V get(K key);
     public long recycle();
+    public void destroy();
 }

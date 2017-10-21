@@ -1,5 +1,8 @@
 package com.coocaa.liteimageloader.core.loader;
 
+import android.util.Log;
+
+import com.coocaa.liteimageloader.ImageLoader;
 import com.coocaa.liteimageloader.core.BitmapParams;
 import com.coocaa.liteimageloader.core.ExecutorSupplier;
 
@@ -29,6 +32,7 @@ public class HttpLoader implements ILoadByte{
                     if (response.code() == 200){
                         byte[] bytes = response.body().bytes();
                         callback.loadByte(params,bytes);
+                        Log.i(ImageLoader.TAG,"load " + params.mUrl + " from internet success");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -37,5 +41,10 @@ public class HttpLoader implements ILoadByte{
                 }
             }
         });
+    }
+
+    @Override
+    public void destroy() {
+
     }
 }

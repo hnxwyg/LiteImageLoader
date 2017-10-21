@@ -2,6 +2,8 @@ package com.coocaa.liteimageloader;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,9 +16,9 @@ import com.coocaa.liteimageloader.cache.Key;
 import com.coocaa.liteimageloader.cache.MemoryCache;
 import com.coocaa.liteimageloader.core.BitmapParams;
 import com.coocaa.liteimageloader.core.LoadCallback;
+import com.coocaa.liteimageloader.core.WrapperDrawable;
 import com.coocaa.liteimageloader.core.loader.ByteLoader;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,11 +45,16 @@ public class ImageLoaderImpl implements IImageLoader{
     public void load(final LoadParams params) {
         if (TextUtils.isEmpty(params.mUrl))
             return;
+        if (!params.mUrl.startsWith("http"))
+            return;
         Uri uri = Uri.parse(params.mUrl);
         String scheme = uri.getScheme();
         if (!TextUtils.isEmpty(scheme)){
             Key key = new Key(params.mUrl,params.mWidth,params.mHeight);
-            final BitmapViews bitmapViews = mMemoryCache.get(key);
+            final BitmapViews bitmapViews;
+            synchronized (mMemoryCache){
+                bitmapViews = mMemoryCache.get(key);
+            }
             if (bitmapViews != null){
                 bitmapViews.addView(params.mIv);
                 mMainThread.post(new Runnable() {
@@ -58,62 +65,88 @@ public class ImageLoaderImpl implements IImageLoader{
                 });
                 return;
             }
-
-            synchronized (mTaskMap){
-                if (mTaskMap.containsKey(key)){
-                    mTaskMap.get(key).add(params);
-                    return;
-                }else{
-                    List<LoadParams> tastList = new ArrayList<>();
-                    tastList.add(params);
-                    mTaskMap.put(key, tastList);
-                }
+            Drawable d = params.mIv.getDrawable();
+            WrapperDrawable drawable = null;
+            if (d instanceof BitmapDrawable){
+                drawable = new WrapperDrawable(((BitmapDrawable) d).getBitmap());
+            }else{
+                params.mIv.setImageResource(R.drawable.bg);
+                drawable = new WrapperDrawable(((BitmapDrawable) params.mIv.getDrawable()).getBitmap());
             }
-            LoadCallback callback = new LoadCallback() {
-                @Override
-                public void loadSuccess(BitmapParams url, final Bitmap bitmap) {
-                    final Key key = new Key(params.mUrl,params.mWidth,params.mHeight);
-                    BitmapViews bitmapViews = new BitmapViews(bitmap);
-                    mMemoryCache.put(key,bitmapViews);
-                    synchronized (mTaskMap){
-                        List<LoadParams> taskList = mTaskMap.get(key);
-                        for (int i = 0; i < taskList.size(); i++) {
-                            final LoadParams p = taskList.get(i);
-                            mMainThread.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (p.mContext instanceof Activity &&
-                                            (!((Activity) p.mContext).isFinishing()
-                                                    || !((Activity) p.mContext).isDestroyed())){
-                                        p.mIv.setImageBitmap(bitmap);
+            params.mIv.setImageDrawable(drawable);
+            drawable.setLoadParams(params);
+        }
+    }
+
+    public void realLoadImage(final LoadParams params){
+        Key key = new Key(params.mUrl,params.mWidth,params.mHeight);
+        synchronized (mTaskMap){
+            if (mTaskMap.containsKey(key)){
+                mTaskMap.get(key).add(params);
+                return;
+            }else{
+                List<LoadParams> tastList = new ArrayList<>();
+                tastList.add(params);
+                mTaskMap.put(key, tastList);
+            }
+        }
+        LoadCallback callback = new LoadCallback() {
+            @Override
+            public void loadSuccess(BitmapParams url, final Bitmap bitmap) {
+
+                mMainThread.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Key key = new Key(params.mUrl,params.mWidth,params.mHeight);
+                        BitmapViews bitmapViews = new BitmapViews(bitmap);
+                        boolean success;
+                        synchronized (mMemoryCache) {
+                            success = mMemoryCache.put(key,bitmapViews);
+                        }
+                        synchronized (mTaskMap){
+                            if (!success){
+                                mTaskMap.remove(key);
+                                return;
+                            }
+                            List<LoadParams> taskList = mTaskMap.get(key);
+                            for (int i = 0; i < taskList.size(); i++) {
+                                final LoadParams p = taskList.get(i);
+                                if (p.mContext instanceof Activity &&
+                                        (!((Activity) p.mContext).isFinishing()
+                                                || !((Activity) p.mContext).isDestroyed())){
+                                    p.mIv.setImageBitmap(bitmap);
+                                    synchronized (mMemoryCache) {
                                         mMemoryCache.get(key).addView(p.mIv);
                                     }
                                 }
-                            });
+                            }
+                            mTaskMap.remove(key);
                         }
                     }
-                }
-                @Override
-                public void loadFailed(BitmapParams p) {
+                });
+            }
 
-                }
-            };
-            BitmapParams bitmapParams = new BitmapParams.Builder()
-                    .setHeight(params.mHeight)
-                    .setWidth(params.mWidth)
-                    .setUrl(params.mUrl)
-                    .build();
-            mByteLoader.loadImage(bitmapParams,callback);
-        }
+            @Override
+            public void loadFailed(BitmapParams p) {
+
+            }
+        };
+        BitmapParams bitmapParams = new BitmapParams.Builder()
+                .setHeight(params.mHeight)
+                .setWidth(params.mWidth)
+                .setUrl(params.mUrl)
+                .build();
+        mByteLoader.loadImage(bitmapParams,callback);
     }
 
     @Override
     public void clearMemoryCache(Key key) {
-        BitmapViews bitmapViews = mMemoryCache.get(key);
-        if (bitmapViews != null){
-            int memory = bitmapViews.forceRecycle();
-            Log.i(ImageLoader.TAG,"recycle bitmap size " + memory);
+        synchronized (mMemoryCache){
             mMemoryCache.remove(key);
         }
+    }
+
+    public void destroy(){
+        mMemoryCache.destroy();
     }
 }

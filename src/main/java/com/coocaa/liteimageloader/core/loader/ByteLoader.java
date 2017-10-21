@@ -66,4 +66,10 @@ public class ByteLoader implements ILoader{
             });
         }
     }
+
+    @Override
+    public void destroy() {
+        mByteCache.destroy();
+        mFileLoader.destroy();
+    }
 }

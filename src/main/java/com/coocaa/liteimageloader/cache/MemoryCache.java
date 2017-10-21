@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.coocaa.liteimageloader.ImageLoader;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,12 +24,14 @@ public class MemoryCache extends Cache<Key,BitmapViews>{
             mCache.put(key, bitmapViews);
             mCurrentSize += bitmapViews.get().getByteCount();
             Log.i(ImageLoader.TAG,"add bitmap and current cache size is " + mCurrentSize);
+            return true;
         }else{
             recycle();
             if (mCurrentSize + bitmapViews.get().getByteCount() < mTotalSize) {
                 mCache.put(key, bitmapViews);
                 mCurrentSize += bitmapViews.get().getByteCount();
                 Log.i(ImageLoader.TAG,"add bitmap and current cache size is " + mCurrentSize);
+                return true;
             }else{
                 Log.e(ImageLoader.TAG,"the config memory cache has full,please check memory leak");
             }
@@ -38,6 +41,12 @@ public class MemoryCache extends Cache<Key,BitmapViews>{
 
     @Override
     public synchronized void remove(Key key) {
+        BitmapViews bitmapViews = get(key);
+        if (bitmapViews != null){
+            int memory = bitmapViews.forceRecycle();
+            mCurrentSize -= memory;
+            Log.i(ImageLoader.TAG,"recycle bitmap size " + memory);
+        }
         mCache.remove(key);
     }
 
@@ -50,16 +59,25 @@ public class MemoryCache extends Cache<Key,BitmapViews>{
     @Override
     public synchronized long recycle() {
         System.gc();
-        Set<Map.Entry<Key,BitmapViews>> entrySet = mCache.entrySet();
+        Iterator<Map.Entry<Key,BitmapViews>> iterator = mCache.entrySet().iterator();
         long tempSize = mCurrentSize;
-        for (Map.Entry<Key, BitmapViews> keyBitmapViewsEntry : entrySet) {
-            int recycle = keyBitmapViewsEntry.getValue().recycle();
+        while (iterator.hasNext()){
+            int recycle = iterator.next().getValue().recycle();
             if (recycle > 0){
                 mCurrentSize -= recycle;
-                mCache.remove(keyBitmapViewsEntry.getKey());
+                iterator.remove();
             }
         }
         Log.i(ImageLoader.TAG,"recycle bitmap size " + (tempSize - mCurrentSize) + " current cache size is " + mCurrentSize);
         return tempSize - mCurrentSize;
+    }
+
+    @Override
+    public void destroy() {
+        Set<Map.Entry<Key,BitmapViews>> entrySet = mCache.entrySet();
+        for (Map.Entry<Key, BitmapViews> keyBitmapViewsEntry : entrySet) {
+            keyBitmapViewsEntry.getValue().forceRecycle();
+        }
+        mCache.clear();
     }
 }
